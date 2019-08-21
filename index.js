@@ -41,11 +41,11 @@ var args = process.argv.slice(2);
         process.exit(-1);
     }
 
-    await page.screenshot({ path: 'screenshot.png' });
     var formText = await page.$eval('form#FormBookingCreate', el => el.innerText);
     logger.info('"' + formText + '"');
     if (formText.search('n\'existe plus de plage') >= 0) {
         logger.info('No place available. exiting...');
+        await page.screenshot({ path: 'screenshot.png' });
         browser.close();
         process.exit(-1);
     }
@@ -78,4 +78,7 @@ var args = process.argv.slice(2);
             process.exit(0);
         }
     });
+
+    logger.info('Taking screenshot and exiting...');
+    await page.screenshot({ path: 'screenshot.png' });
 })();
