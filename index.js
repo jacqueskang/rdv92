@@ -1,33 +1,41 @@
 const puppeteer = require('puppeteer');
 const nodemailer = require('nodemailer');
+const log4js = require('log4js');
+log4js.configure({
+    appenders: { cheese: { type: 'file', filename: 'logs.txt' } },
+    categories: { default: { appenders: ['cheese'], level: 'error' } }
+});
+
+var logger = log4js.getLogger();
+logger.level = 'debug';
 
 var args = process.argv.slice(2);
 
 (async () => {
-    console.log('Launching browser...');
+    logger.info('Launching browser...');
     const browser = await puppeteer.launch();
 
-    console.log('Showing booking page...');
+    logger.info('Showing booking page...');
     const page = await browser.newPage();
     const response1 = await page.goto('http://www.hauts-de-seine.gouv.fr/booking/create/11776/0');
     if (!response1.ok()) {
-        console.log('Page showing error (see screenshot). Exiting...');
+        logger.error('Page showing error (see screenshot). Exiting...');
         await page.screenshot({ path: 'screenshot.png' });
         browser.close();
         process.exit(-1);
     }
 
-    console.log('Clicking accept condition checkbox...');
+    logger.info('Clicking accept condition checkbox...');
     await page.click('input#condition');
 
-    console.log('Clicking next button and waiting for navigation...');
+    logger.info('Clicking next button and waiting for navigation...');
     const [response2, _] = await Promise.all([
         page.waitForNavigation(),
         page.click('input[name=nextButton]'),
     ]);
 
     if (!response2.ok()) {
-        console.log('Page showing error (see screenshot). Exiting...');
+        logger.error('Page showing error (see screenshot). Exiting...');
         await page.screenshot({ path: 'screenshot.png' });
         browser.close();
         process.exit(-1);
@@ -35,14 +43,14 @@ var args = process.argv.slice(2);
 
     await page.screenshot({ path: 'screenshot.png' });
     var formText = await page.$eval('form#FormBookingCreate', el => el.innerText);
-    console.log('"' + formText + '"');
+    logger.info('"' + formText + '"');
     if (formText.search('n\'existe plus de plage') >= 0) {
-        console.log('No place available. exiting...');
+        logger.info('No place available. exiting...');
         browser.close();
         process.exit(-1);
     }
 
-    console.log('PLACE DISPONIBLE!!! Sending email...');
+    logger.info('PLACE DISPONIBLE!!! Sending email...');
     var transporter = nodemailer.createTransport({
         host: 'email-smtp.eu-west-1.amazonaws.com',
         port: 587,
@@ -60,12 +68,12 @@ var args = process.argv.slice(2);
         text: 'http://www.hauts-de-seine.gouv.fr/booking/create/11776/0'
     }, function (error, info) {
         if (error) {
-            console.log('Error while sending email: ' + error);
+            logger.error('Error while sending email: ' + error);
             browser.close();
             process.exit(-1);
         } else {
-            console.log('Email sent: ' + info.response);
-            console.log('Closing browser and exiting...');
+            logger.info('Email sent: ' + info.response);
+            logger.info('Closing browser and exiting...');
             browser.close();
             process.exit(0);
         }
