@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/jacqueskang/rdv92#readme",
   "dependencies": {
+    "nodemailer": "^6.3.0",
     "puppeteer": "^1.19.0"
   }
 }
