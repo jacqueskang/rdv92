@@ -93,7 +93,7 @@ async function sendEmailAndQuit(page, browser, guichet, address) {
 
         var formText = await page.$eval('form#FormBookingCreate', el => el.innerText);
         logger.info(`Text read: '${formText}'`);
-        if (formText.search('n\'existe plus de plage!') < 0) {
+        if (formText.search('n\'existe plus de plage') < 0) {
             await sendEmailAndQuit(page, browser, '1B', 'jkang.perso@gmail.com');
         }
 
@@ -108,4 +108,6 @@ async function sendEmailAndQuit(page, browser, guichet, address) {
     }
 
     logger.info(`No place available. Exiting...`);
+    browser.close();
+    process.exit(0);
 })();
