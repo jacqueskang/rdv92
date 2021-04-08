@@ -35,16 +35,16 @@ async function sendEmailAndQuit(page, browser, guichet, address) {
         port: 587,
         secure: false,
         auth: {
-            user: 'AKIA5PXSB3J4TYLESH7G',
+            user: 'AKIAQ5N2TE4QAANX4NM3',
             pass: args[0]
         }
     });
 
     let info = await transporter.sendMail({
-        from: 'jacques.kang@sweeyoo.com',
+        from: 'noreply@dev.sweeyoo.com',
         to: address,
         subject: `PLACE DISPONIBLE : guichet ${guichet} !!!`,
-        text: 'http://www.hauts-de-seine.gouv.fr/booking/create/12083'
+        text: 'https://www.hauts-de-seine.gouv.fr/booking/create/11681/1'
     });
 
     logger.info('Email sent. Taking screenshot (last-available.png) and exiting...');
@@ -61,27 +61,14 @@ async function sendEmailAndQuit(page, browser, guichet, address) {
     logger.info('Showing booking page...');
     const page = await browser.newPage();
 
-    var response = await page.goto('http://www.hauts-de-seine.gouv.fr/booking/create/12083');
-    await checkResponse(page, browser, response)
-
-    logger.info('Clicking accept condition checkbox...');
-    await page.click('input#condition');
-
-    logger.info('Clicking next button...');
-    await clickButtonAndWaitForNavigation(page, browser, 'input[name=nextButton]');
+    var response = await page.goto('https://www.hauts-de-seine.gouv.fr/booking/create/11681/1');
 
     var guichets = [{
-        name: '1B',
-        id: 'planning15255'
+        name: '34',
+        id: 'planning11684'
     }, {
-        name: '4B',
-        id: 'planning14673'
-    }, {
-        name: '3B',
-        id: 'planning14806'
-    }, {
-        name: '2B',
-        id: 'planning14932'
+        name: '30',
+        id: 'planning16493'
     }];
 
     for (const guichet of guichets) {
@@ -94,7 +81,7 @@ async function sendEmailAndQuit(page, browser, guichet, address) {
         var formText = await page.$eval('form#FormBookingCreate', el => el.innerText);
         logger.info(`Text read: '${formText}'`);
         if (formText.search('n\'existe plus de plage') < 0) {
-            await sendEmailAndQuit(page, browser, '1B', 'jkang.perso@gmail.com');
+            await sendEmailAndQuit(page, browser, guichet.name, 'mikelan25@gmail.com');
         }
 
         logger.info(`No place available for guichet '${guichet.name}'. Clicking on finish button...`);
